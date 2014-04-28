@@ -6,5 +6,6 @@
         internal const string RavenUserLoginKeyTemplate = "RavenUserLogins/{0}/{1}";
         internal const string RavenUserEmailKeyTemplate = "RavenUserEmails/{0}";
         internal const string RavenUserPhoneNumberKeyTemplate = "RavenUserPhoneNumbers/{0}";
+        internal const string RavenUserRolesKeyTemplate = "RavenUserRoles/{0}";
     }
 }
