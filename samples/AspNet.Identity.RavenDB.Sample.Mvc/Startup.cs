@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Web.Mvc;
+using AspNet.Identity.RavenDB.Sample.Mvc.Infrastructure.AutoMapper;
 using Autofac;
 using Autofac.Integration.Mvc;
 using Microsoft.Owin;
@@ -7,6 +8,7 @@ using Owin;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Extensions;
+using Raven.Client.UniqueConstraints;
 
 [assembly: OwinStartupAttribute(typeof(AspNet.Identity.RavenDB.Sample.Mvc.Startup))]
 namespace AspNet.Identity.RavenDB.Sample.Mvc
@@ -22,11 +24,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
             ContainerBuilder builder = new ContainerBuilder();
             builder.Register(c =>
             {
-                IDocumentStore store = new DocumentStore
+                var store = new DocumentStore
                 {
                     Url = "http://localhost:8080",
                     DefaultDatabase = RavenDefaultDatabase
-                }.Initialize();
+                };
+
+                store.RegisterListener(new UniqueConstraintsStoreListener());
+                store.Initialize();
 
                 store.DatabaseCommands.EnsureDatabaseExists(RavenDefaultDatabase);
 
@@ -44,12 +49,15 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
             }).As<IAsyncDocumentSession>().InstancePerHttpRequest();
             
             builder.RegisterControllers(Assembly.GetExecutingAssembly());
-            
+
+
             app.UseAutofacMiddleware(builder.Build());
             app.UseAutofacMvc();
 
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
+
+            AutoMapperConfiguration.Configure();
         }
     }
 }

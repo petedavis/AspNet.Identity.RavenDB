@@ -76,18 +76,31 @@ namespace AspNet.Identity.RavenDB.Stores
             await _documentSession.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Loads the user by id from the current document session.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This will handle both full document id "RaventUser/1" or just the ducument id "1".
+        /// </remarks>
         public Task<TUser> FindByIdAsync(string userId)
         {
             if (userId == null) throw new ArgumentNullException("userId");
 
-            return _documentSession.LoadAsync<TUser>(userId);
+            if(userId.IndexOf("/", StringComparison.OrdinalIgnoreCase) > 0)
+                return _documentSession.LoadAsync<TUser>(userId);
+
+            var id = int.Parse(userId);
+            return _documentSession.LoadAsync<TUser>(id);
         }
 
         public Task<TUser> FindByNameAsync(string userName)
         {
             if (userName == null) throw new ArgumentNullException("userName");
 
-            return _documentSession.LoadAsync<TUser>(RavenUser.GenerateKey(userName));
+            //return _documentSession.LoadAsync<TUser>(RavenUser.GenerateKey(userName));
+            return _documentSession.Query<TUser>().FirstOrDefaultAsync(x => x.UserName == userName);
         }
 
         /// <remarks>

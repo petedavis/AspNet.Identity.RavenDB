@@ -1,4 +1,10 @@
-﻿using AspNet.Identity.RavenDB.Sample.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using AspNet.Identity.RavenDB.Entities;
+using AspNet.Identity.RavenDB.Sample.Mvc;
+using AspNet.Identity.RavenDB.Sample.Mvc.Infrastructure.AutoMapper;
+using AspNet.Identity.RavenDB.Sample.Mvc.Infrastructure.AutoMapper.Profiles;
 using AspNet.Identity.RavenDB.Sample.Mvc.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
@@ -54,7 +60,7 @@ namespace IdentitySample.Controllers
         // GET: /Users/
         public async Task<ActionResult> Index()
         {
-            return View(await UserManager.Users.ToListAsync());
+            return ListView(await UserManager.Users.ToListAsync());
         }
 
         //
@@ -126,21 +132,20 @@ namespace IdentitySample.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var user = await UserManager.FindByNameAsync(id);
+            var user = await UserManager.FindByIdAsync(id);
             if (user == null)
             {
                 return HttpNotFound();
             }
 
-            var userRoles = await UserManager.GetRolesAsync(user.Id);
-
+            var ravenRoles = await RoleManager.Roles.ToListAsync();
             return View(new EditUserViewModel()
             {
                 Id = user.Id,
                 Email = user.Email,
-                RolesList = RoleManager.Roles.ToList().Select(x => new SelectListItem()
+                RolesList = ravenRoles.Select(x => new SelectListItem()
                 {
-                    Selected = userRoles.Contains(x.Name),
+                    Selected = user.Claims.Any(c => c.ClaimType == ClaimTypes.Role && c.ClaimValue.Equals(x.Name, StringComparison.OrdinalIgnoreCase)),
                     Text = x.Name,
                     Value = x.Name
                 })
@@ -164,24 +169,28 @@ namespace IdentitySample.Controllers
                 user.UserName = editUser.Email;
                 user.SetEmail(editUser.Email);
 
-                var userRoles = await UserManager.GetRolesAsync(user.Id);
+                var userRoles = user.Claims.Where(c => c.ClaimType == ClaimTypes.Role).Select(c => c.ClaimValue).ToList();
 
                 selectedRole = selectedRole ?? new string[] { };
 
-                var result = await UserManager.AddUserToRolesAsync(user.Id, selectedRole.Except(userRoles).ToList<string>());
+                foreach (var claim in selectedRole.Except(userRoles).Select(x => new RavenUserClaim(ClaimTypes.Role, x)))
+                {
+                    user.AddClaim(claim);
+                }
+
+                foreach (var claim in userRoles.Except(selectedRole).Select(x => new RavenUserClaim(ClaimTypes.Role, x)))
+                {
+                    user.RemoveClaim(claim);
+                }
+
+                var result = await UserManager.UpdateAsync(user);
 
                 if (!result.Succeeded)
                 {
                     ModelState.AddModelError("", result.Errors.First());
                     return View();
                 }
-                result = await UserManager.RemoveUserFromRolesAsync(user.Id, userRoles.Except(selectedRole).ToList<string>());
 
-                if (!result.Succeeded)
-                {
-                    ModelState.AddModelError("", result.Errors.First());
-                    return View();
-                }
                 return RedirectToAction("Index");
             }
             ModelState.AddModelError("", "Something failed.");
@@ -231,6 +240,16 @@ namespace IdentitySample.Controllers
                 return RedirectToAction("Index");
             }
             return View();
+        }
+
+        private ActionResult ListView(IList<ApplicationUser> users)
+        {
+            var summaries = users.MapTo<UsersViewModel.UserSummary>();
+
+            return View("Index", new UsersViewModel
+            {
+                Users = summaries
+            });
         }
     }
 }

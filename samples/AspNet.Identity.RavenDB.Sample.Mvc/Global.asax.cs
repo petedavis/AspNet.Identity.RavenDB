@@ -77,13 +77,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 const string password = "Admin@123456";
                 const string roleName = "Admin";
 
-
+                bool saveRequired = false;
                 //Create Role Admin if it does not exist
                 var role = roleManager.FindByName(roleName);
                 if (role == null)
                 {
                     role = new RavenRole(roleName);
                     var roleresult = roleManager.Create(role);
+                    saveRequired = true;
                 }
 
                 var user = userManager.FindByName(name);
@@ -92,6 +93,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                     user = new ApplicationUser(name, name);
                     var result = userManager.Create(user, password);
                     result = userManager.SetLockoutEnabled(user.Id, false);
+                    saveRequired = true;
                 }
 
                 var roleClaim = new RavenUserClaim(ClaimTypes.Role, roleName);
@@ -100,10 +102,11 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 if (!user.Claims.Contains(roleClaim))
                 {
                     user.AddClaim(roleClaim);
-                    userManager.UpdateAsync(user).Wait();
+                    saveRequired = true;
+                    //userManager.UpdateAsync(user).Wait();
                 }
 
-                documentSession.SaveChangesAsync().Wait();
+                if (saveRequired) documentSession.SaveChangesAsync().Wait();
 
                 // Make sure all our indexes are not stale.
                 //documentStore.WaitForStaleIndexesToComplete();

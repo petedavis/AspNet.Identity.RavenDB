@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Security.Claims;
 using Microsoft.AspNet.Identity;
+using Raven.Client.UniqueConstraints;
 using Raven.Imports.Newtonsoft.Json;
 
 namespace AspNet.Identity.RavenDB.Entities
@@ -17,19 +18,23 @@ namespace AspNet.Identity.RavenDB.Entities
         {
             if (userName == null) throw new ArgumentNullException("userName");
 
-            Id = GenerateKey(userName);
             UserName = userName;
             _claims = new List<RavenUserClaim>();
             _logins = new List<RavenUserLogin>();
         }
 
-        public RavenUser(string userName, string email) : this(userName)
+        public RavenUser(string userName, string email)
+            : this(userName)
         {
             Email = email;
         }
 
         public string Id { get; private set; }
+
+        [UniqueConstraint]
         public string UserName { get; set; }
+
+        [UniqueConstraint]
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string PasswordHash { get; private set; }

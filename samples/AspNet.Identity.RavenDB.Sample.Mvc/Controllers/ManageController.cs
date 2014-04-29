@@ -1,15 +1,13 @@
-﻿using AspNet.Identity.RavenDB.Sample.Mvc;
-using AspNet.Identity.RavenDB.Sample.Mvc.Controllers;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
 using AspNet.Identity.RavenDB.Sample.Mvc.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
 
-namespace IdentitySample.Controllers
+namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 {
     [Authorize]
     public class ManageController : Controller
