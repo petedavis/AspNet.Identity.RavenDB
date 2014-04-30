@@ -31,10 +31,10 @@ namespace AspNet.Identity.RavenDB.Entities
 
         public string Id { get; private set; }
 
-        [UniqueConstraint]
+        [UniqueConstraint(CaseInsensitive = true)]
         public string UserName { get; set; }
 
-        [UniqueConstraint]
+        [UniqueConstraint(CaseInsensitive = true)]
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string PasswordHash { get; private set; }
