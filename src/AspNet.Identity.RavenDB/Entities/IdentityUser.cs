@@ -9,7 +9,7 @@ using Raven.Imports.Newtonsoft.Json;
 namespace AspNet.Identity.RavenDB.Entities
 {
     /// <summary>
-    ///     Default EntityFramework IUser implementation
+    ///     Default RavenDB IUser implementation
     /// </summary>
     public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IUser
     {
