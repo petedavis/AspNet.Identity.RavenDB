@@ -9,7 +9,7 @@ using Raven.Client;
 
 namespace AspNet.Identity.RavenDB.Stores
 {
-    public class RoleStore<TRole> : IRoleStore<TRole, string>, IQueryableRoleStore<TRole, string> where TRole : class, IRole<string>
+    public class RoleStore<TRole> : IQueryableRoleStore<TRole, string> where TRole : class, IRole<string>
     {
         private readonly IAsyncDocumentSession _documentSession;
 
@@ -57,7 +57,7 @@ namespace AspNet.Identity.RavenDB.Stores
         {
             if (roleName == null) throw new ArgumentNullException("roleName");
 
-            return _documentSession.LoadAsync<TRole>(RavenRole.GenerateKey(roleName));
+            return _documentSession.LoadAsync<TRole>(IdentityUserRole.GenerateKey(roleName));
         }
 
         public IQueryable<TRole> Roles

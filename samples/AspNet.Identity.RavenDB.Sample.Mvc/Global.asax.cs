@@ -71,8 +71,8 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
             using (var documentSession = documentStore.OpenAsyncSession())
             {
                 documentSession.Advanced.UseOptimisticConcurrency = true;
-                var userManager = new ApplicationUserManager(new RavenUserStore<ApplicationUser>(documentSession, false));
-                var roleManager = new ApplicationRoleManager(new RoleStore<RavenRole>(documentSession));
+                var userManager = new ApplicationUserManager(new IdentityUserStore<ApplicationUser>(documentSession, false));
+                var roleManager = new ApplicationRoleManager(new RoleStore<IdentityUserRole>(documentSession));
                 const string name = "admin@admin.com";
                 const string password = "Admin@123456";
                 const string roleName = "Admin";
@@ -82,7 +82,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 var role = roleManager.FindByName(roleName);
                 if (role == null)
                 {
-                    role = new RavenRole(roleName);
+                    role = new IdentityUserRole(roleName);
                     var roleresult = roleManager.Create(role);
                     saveRequired = true;
                 }
@@ -96,12 +96,12 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                     saveRequired = true;
                 }
 
-                var roleClaim = new RavenUserClaim(ClaimTypes.Role, roleName);
+                var roleClaim = new IdentityUserClaim(ClaimTypes.Role, roleName);
 
                 // Add user admin to Role Admin if not already added
                 if (!user.Claims.Contains(roleClaim))
                 {
-                    user.AddClaim(roleClaim);
+                    user.Claims.Add(roleClaim);
                     saveRequired = true;
                     //userManager.UpdateAsync(user).Wait();
                 }

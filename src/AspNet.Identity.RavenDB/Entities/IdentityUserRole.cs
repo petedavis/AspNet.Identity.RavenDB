@@ -4,10 +4,10 @@ using Raven.Imports.Newtonsoft.Json;
 
 namespace AspNet.Identity.RavenDB.Entities
 {
-    public class RavenRole : IRole<string>
+    public class IdentityUserRole : IRole<string>
     {
         [JsonConstructor]
-        public RavenRole(string name)
+        public IdentityUserRole(string name)
         {
             if (name == null) throw new ArgumentNullException("name");
 
@@ -20,7 +20,7 @@ namespace AspNet.Identity.RavenDB.Entities
 
         internal static string GenerateKey(string roleName)
         {
-            return string.Format(Constants.RavenUserRolesKeyTemplate, roleName);
+            return string.Format(Constants.IdentityUserRolesKeyTemplate, roleName);
         }
     }
 }

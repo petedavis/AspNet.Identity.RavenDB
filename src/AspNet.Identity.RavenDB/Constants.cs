@@ -2,10 +2,10 @@
 {
     internal static class Constants
     {
-        internal const string RavenUserKeyTemplate = "RavenUsers/{0}";
-        internal const string RavenUserLoginKeyTemplate = "RavenUserLogins/{0}/{1}";
-        internal const string RavenUserEmailKeyTemplate = "RavenUserEmails/{0}";
-        internal const string RavenUserPhoneNumberKeyTemplate = "RavenUserPhoneNumbers/{0}";
-        internal const string RavenUserRolesKeyTemplate = "RavenUserRoles/{0}";
+        internal const string IdentityUserKeyTemplate = "IdentityUsers/{0}";
+        internal const string IdentityUserLoginKeyTemplate = "IdentityUserLogins/{0}/{1}";
+        internal const string IdentityUserEmailKeyTemplate = "IdentityUserEmails/{0}";
+        internal const string IdentityUserPhoneNumberKeyTemplate = "IdentityUserPhoneNumbers/{0}";
+        internal const string IdentityUserRolesKeyTemplate = "IdentityUserRoles/{0}";
     }
 }

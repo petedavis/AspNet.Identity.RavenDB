@@ -99,7 +99,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                var role = new RavenRole(roleViewModel.Name);
+                var role = new IdentityUserRole(roleViewModel.Name);
                 var roleresult = await RoleManager.CreateAsync(role);
                 if (!roleresult.Succeeded)
                 {

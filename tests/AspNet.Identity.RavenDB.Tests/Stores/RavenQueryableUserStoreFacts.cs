@@ -9,7 +9,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
     public class RavenQueryableUserStoreFacts : TestBase
     {
         [Fact]
-        public async Task RavenUserStore_Users_Should_Expose_IQueryable_Over_IRavenQueryable()
+        public async Task IdentityUserStore_Users_Should_Expose_IQueryable_Over_IRavenQueryable()
         {
             using (IDocumentStore store = CreateEmbeddableStore())
             {
@@ -19,8 +19,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName);
-                    RavenUser userToSearch = new RavenUser(userNameToSearch);
+                    IdentityUser user = new IdentityUser(userName);
+                    IdentityUser userToSearch = new IdentityUser(userNameToSearch);
                     await ses.StoreAsync(user);
                     await ses.StoreAsync(userToSearch);
                     await ses.SaveChangesAsync();
@@ -30,8 +30,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 {
                     // Act
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser retrievedUser = await userStore.Users.FirstOrDefaultAsync(user => user.UserName == userNameToSearch);
+                    IdentityUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser retrievedUser = await userStore.Users.FirstOrDefaultAsync(user => user.UserName == userNameToSearch);
 
                     // Assert
                     Assert.NotNull(retrievedUser);

@@ -20,7 +20,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
 
             store.Initialize();
             store.RegisterListener(new NoStaleQueriesListener());
-            // IndexCreation.CreateIndexes(typeof(RavenUser_Roles).Assembly, store);
+            // IndexCreation.CreateIndexes(typeof(IdentityUser_Roles).Assembly, store);
 
             return store;
         }

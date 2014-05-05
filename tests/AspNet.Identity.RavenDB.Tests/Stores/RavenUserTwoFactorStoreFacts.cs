@@ -7,7 +7,7 @@ using Xunit;
 
 namespace AspNet.Identity.RavenDB.Tests.Stores
 {
-    public class RavenUserTwoFactorStoreFacts : TestBase
+    public class IdentityUserTwoFactorStoreFacts : TestBase
     {
         [Fact]
         public async Task GetTwoFactorEnabledAsync_Should_Get_User_IsTwoFactorEnabled_Value()
@@ -15,13 +15,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IDocumentStore store = CreateEmbeddableStore())
             {
                 const string userName = "Tugberk";
-                const string userId = "RavenUsers/Tugberk";
+                const string userId = "IdentityUsers/1";
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName);
-                    user.EnableTwoFactorAuthentication();
+                    var user = new IdentityUser(userName) {TwoFactorEnabled = true};
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -30,8 +29,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 {
                     // Act
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = await ses.LoadAsync<RavenUser>(userId);
-                    IUserTwoFactorStore<RavenUser, string> userTwoFactorStore = new RavenUserStore<RavenUser>(ses);
+                    IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
+                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new IdentityUserStore<IdentityUser>(ses);
                     bool isTwoFactorEnabled = await userTwoFactorStore.GetTwoFactorEnabledAsync(user);
 
                     // Assert
@@ -46,13 +45,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IDocumentStore store = CreateEmbeddableStore())
             {
                 const string userName = "Tugberk";
-                const string userId = "RavenUsers/Tugberk";
+                const string userId = "IdentityUsers/1";
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName);
-                    user.EnableTwoFactorAuthentication();
+                    var user = new IdentityUser(userName) {TwoFactorEnabled = true};
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -61,12 +59,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 {
                     // Act
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = await ses.LoadAsync<RavenUser>(userId);
-                    IUserTwoFactorStore<RavenUser, string> userTwoFactorStore = new RavenUserStore<RavenUser>(ses);
+                    IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
+                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new IdentityUserStore<IdentityUser>(ses);
                     await userTwoFactorStore.SetTwoFactorEnabledAsync(user, enabled: true);
 
                     // Assert
-                    Assert.True(user.IsTwoFactorEnabled);
+                    Assert.True(user.TwoFactorEnabled);
                 }
             }
         }

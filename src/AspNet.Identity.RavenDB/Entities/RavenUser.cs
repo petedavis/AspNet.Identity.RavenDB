@@ -8,188 +8,134 @@ using Raven.Imports.Newtonsoft.Json;
 
 namespace AspNet.Identity.RavenDB.Entities
 {
-    public class RavenUser : IUser
+    /// <summary>
+    ///     Default EntityFramework IUser implementation
+    /// </summary>
+    public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IUser
     {
-        private List<RavenUserClaim> _claims;
-        private List<RavenUserLogin> _logins;
-
-        [JsonConstructor]
-        public RavenUser(string userName)
+        /// <summary>
+        ///     Constructor which creates a new Guid for the Id
+        /// </summary>
+        public IdentityUser()
         {
-            if (userName == null) throw new ArgumentNullException("userName");
-
-            UserName = userName;
-            _claims = new List<RavenUserClaim>();
-            _logins = new List<RavenUserLogin>();
         }
 
-        public RavenUser(string userName, string email)
+        /// <summary>
+        ///     Constructor that takes a userName
+        /// </summary>
+        /// <param name="userName"></param>
+        public IdentityUser(string userName)
+            : this()
+        {
+            UserName = userName;
+        }
+
+        /// <summary>
+        ///     Constructor that takes a userName
+        /// </summary>
+        /// <param name="userName"></param>
+        public IdentityUser(string userName, string email)
             : this(userName)
         {
             Email = email;
         }
+    }
 
-        public string Id { get; private set; }
-
-        [UniqueConstraint(CaseInsensitive = true)]
-        public string UserName { get; set; }
-
-        [UniqueConstraint(CaseInsensitive = true)]
-        public string Email { get; private set; }
-        public string PhoneNumber { get; private set; }
-        public string PasswordHash { get; private set; }
-        public string SecurityStamp { get; private set; }
-        public bool IsLockoutEnabled { get; private set; }
-        public bool IsTwoFactorEnabled { get; private set; }
-
-        public int AccessFailedCount { get; private set; }
-        public DateTimeOffset? LockoutEndDate { get; private set; }
-
-        public IEnumerable<RavenUserClaim> Claims
+    /// <summary>
+    ///     Default RavenDB IUser implementation
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TLogin"></typeparam>
+    /// <typeparam name="TRole"></typeparam>
+    /// <typeparam name="TClaim"></typeparam>
+    public class IdentityUser<TKey, TLogin, TRole, TClaim> : IUser<TKey>
+        where TLogin : IdentityUserLogin
+        where TRole : IdentityUserRole
+        where TClaim : IdentityUserClaim
+    {
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        public IdentityUser()
         {
-            get
-            {
-                return _claims;
-            }
-
-            private set
-            {
-                if (_claims == null)
-                {
-                    _claims = new List<RavenUserClaim>();
-                }
-
-                _claims.AddRange(value);
-            }
-        }
-        public IEnumerable<RavenUserLogin> Logins
-        {
-            get
-            {
-                return _logins;
-            }
-
-            private set
-            {
-                if (_logins == null)
-                {
-                    _logins = new List<RavenUserLogin>();
-                }
-
-                _logins.AddRange(value);
-            }
+            Claims = new List<TClaim>();
+            Roles = new List<TRole>();
+            Logins = new List<TLogin>();
         }
 
-        public virtual void EnableTwoFactorAuthentication()
-        {
-            IsTwoFactorEnabled = true;
-        }
+        /// <summary>
+        ///     Email
+        /// </summary>
+        public virtual string Email { get; set; }
 
-        public virtual void DisableTwoFactorAuthentication()
-        {
-            IsTwoFactorEnabled = false;
-        }
+        /// <summary>
+        ///     True if the email is confirmed, default is false
+        /// </summary>
+        public virtual bool EmailConfirmed { get; set; }
 
-        public virtual void EnableLockout()
-        {
-            IsLockoutEnabled = true;
-        }
+        /// <summary>
+        ///     The salted/hashed form of the user password
+        /// </summary>
+        public virtual string PasswordHash { get; set; }
 
-        public virtual void DisableLockout()
-        {
-            IsLockoutEnabled = false;
-        }
+        /// <summary>
+        ///     A random value that should change whenever a users credentials have changed (password changed, login removed)
+        /// </summary>
+        public virtual string SecurityStamp { get; set; }
 
-        public virtual void SetEmail(string email)
-        {
-            Email = email;
-        }
+        /// <summary>
+        ///     PhoneNumber for the user
+        /// </summary>
+        public virtual string PhoneNumber { get; set; }
 
-        public virtual void SetPhoneNumber(string phoneNumber)
-        {
-            PhoneNumber = phoneNumber;
-        }
+        /// <summary>
+        ///     True if the phone number is confirmed, default is false
+        /// </summary>
+        public virtual bool PhoneNumberConfirmed { get; set; }
 
-        public virtual void SetPasswordHash(string passwordHash)
-        {
-            PasswordHash = passwordHash;
-        }
+        /// <summary>
+        ///     Is two factor enabled for the user
+        /// </summary>
+        public virtual bool TwoFactorEnabled { get; set; }
 
-        public virtual void SetSecurityStamp(string securityStamp)
-        {
-            SecurityStamp = securityStamp;
-        }
+        /// <summary>
+        ///     DateTime in UTC when lockout ends, any time in the past is considered not locked out.
+        /// </summary>
+        public virtual DateTimeOffset? LockoutEndDateUtc { get; set; }
 
-        public virtual void IncrementAccessFailedCount()
-        {
-            AccessFailedCount++;
-        }
+        /// <summary>
+        ///     Is lockout enabled for this user
+        /// </summary>
+        public virtual bool LockoutEnabled { get; set; }
 
-        public virtual void ResetAccessFailedCount()
-        {
-            AccessFailedCount = 0;
-        }
+        /// <summary>
+        ///     Used to record failures for the purposes of lockout
+        /// </summary>
+        public virtual int AccessFailedCount { get; set; }
 
-        public virtual void LockUntil(DateTimeOffset lockoutEndDate)
-        {
-            LockoutEndDate = lockoutEndDate;
-        }
+        /// <summary>
+        ///     Navigation property for user roles
+        /// </summary>
+        public virtual ICollection<TRole> Roles { get; private set; }
 
-        public virtual void AddClaim(Claim claim)
-        {
-            if (claim == null)
-            {
-                throw new ArgumentNullException("claim");
-            }
+        /// <summary>
+        ///     Navigation property for user claims
+        /// </summary>
+        public virtual ICollection<TClaim> Claims { get; private set; }
 
-            AddClaim(new RavenUserClaim(claim));
-        }
+        /// <summary>
+        ///     Navigation property for user logins
+        /// </summary>
+        public virtual ICollection<TLogin> Logins { get; private set; }
 
-        public virtual void AddClaim(RavenUserClaim ravenUserClaim)
-        {
-            if (ravenUserClaim == null)
-            {
-                throw new ArgumentNullException("ravenUserClaim");
-            }
+        /// <summary>
+        ///     User ID (Primary Key)
+        /// </summary>
+        public virtual TKey Id { get; set; }
 
-            _claims.Add(ravenUserClaim);
-        }
-
-        public virtual void RemoveClaim(RavenUserClaim ravenUserClaim)
-        {
-            if (ravenUserClaim == null)
-            {
-                throw new ArgumentNullException("ravenUserClaim");
-            }
-
-            _claims.Remove(ravenUserClaim);
-        }
-
-        public virtual void AddLogin(RavenUserLogin ravenUserLogin)
-        {
-            if (ravenUserLogin == null)
-            {
-                throw new ArgumentNullException("ravenUserLogin");
-            }
-
-            _logins.Add(ravenUserLogin);
-        }
-
-        public virtual void RemoveLogin(RavenUserLogin ravenUserLogin)
-        {
-            if (ravenUserLogin == null)
-            {
-                throw new ArgumentNullException("ravenUserLogin");
-            }
-
-            _logins.Remove(ravenUserLogin);
-        }
-
-        // statics
-
-        internal static string GenerateKey(string userName)
-        {
-            return string.Format(Constants.RavenUserKeyTemplate, userName);
-        }
+        /// <summary>
+        ///     User name
+        /// </summary>
+        public virtual string UserName { get; set; }
     }
 }

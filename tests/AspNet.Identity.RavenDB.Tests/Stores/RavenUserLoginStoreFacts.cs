@@ -11,7 +11,7 @@ using Xunit;
 
 namespace AspNet.Identity.RavenDB.Tests.Stores
 {
-    public class RavenUserLoginStoreFacts : TestBase
+    public class IdentityUserLoginStoreFacts : TestBase
     {
         [Fact]
         public async Task Add_Should_Add_New_Login_If_User_Exists()
@@ -22,20 +22,22 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
 
             using (IDocumentStore store = CreateEmbeddableStore())
             {
+                string userId;
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserLoginStore<RavenUser, string> userLoginStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = new RavenUser(userName);
+                    IUserLoginStore<IdentityUser, string> userLoginStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = new IdentityUser(userName);
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
+                    userId = user.Id;
                 }
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserLoginStore<RavenUser, string> userLoginStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = await ses.LoadAsync<RavenUser>(RavenUser.GenerateKey(userName));
+                    IUserLoginStore<IdentityUser, string> userLoginStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
 
                     // Act
                     UserLoginInfo loginToAdd = new UserLoginInfo(loginProvider, providerKey);
@@ -43,7 +45,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                     await ses.SaveChangesAsync();
 
                     // Assert
-                    RavenUserLogin foundLogin = await ses.LoadAsync<RavenUserLogin>(RavenUserLogin.GenerateKey(loginProvider, providerKey));
+                    IdentityUserLogin foundLogin = await ses.LoadAsync<IdentityUserLogin>(IdentityUserLogin.GenerateKey(loginProvider, providerKey));
                     Assert.Equal(1, user.Logins.Count());
                     Assert.NotNull(foundLogin);
                 }
@@ -59,25 +61,27 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
 
             using (IDocumentStore store = CreateEmbeddableStore())
             {
+                string userId;
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                    UserManager<RavenUser> userManager = new UserManager<RavenUser>(userStore);
+                    IdentityUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                    UserManager<IdentityUser> userManager = new UserManager<IdentityUser>(userStore);
 
-                    RavenUser user = new RavenUser(userName);
+                    IdentityUser user = new IdentityUser(userName);
                     UserLoginInfo loginToAdd = new UserLoginInfo(loginProvider, providerKey);
                     await userManager.CreateAsync(user);
                     await userManager.AddLoginAsync(user.Id, loginToAdd);
                     await ses.SaveChangesAsync();
+                    userId = user.Id;
                 }
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserLoginStore<RavenUser, string> userLoginStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = await ses.LoadAsync<RavenUser>(RavenUser.GenerateKey(userName));
-                    RavenUserLogin foundLogin = await ses.LoadAsync<RavenUserLogin>(RavenUserLogin.GenerateKey(loginProvider, providerKey));
+                    IUserLoginStore<IdentityUser, string> userLoginStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
+                    IdentityUserLogin foundLogin = await ses.LoadAsync<IdentityUserLogin>(IdentityUserLogin.GenerateKey(loginProvider, providerKey));
 
                     // Assert
                     Assert.Equal(1, user.Logins.Count());
@@ -99,11 +103,11 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserLoginStore<RavenUser, string> userLoginStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = new RavenUser(userName);
-                    RavenUserLogin userLogin = new RavenUserLogin(user.Id, new UserLoginInfo(loginProvider, providerKey));
-                    user.AddLogin(userLogin);
+                    IUserLoginStore<IdentityUser, string> userLoginStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = new IdentityUser(userName);
                     await ses.StoreAsync(user);
+                    IdentityUserLogin userLogin = new IdentityUserLogin(user.Id, new UserLoginInfo(loginProvider, providerKey));
+                    user.Logins.Add(userLogin);
                     await ses.StoreAsync(userLogin);
                     await ses.SaveChangesAsync();
                 }
@@ -111,11 +115,11 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserLoginStore<RavenUser, string> userLoginStore = new RavenUserStore<RavenUser>(ses);
+                    IUserLoginStore<IdentityUser, string> userLoginStore = new IdentityUserStore<IdentityUser>(ses);
 
                     // Act
                     UserLoginInfo loginInfo = new UserLoginInfo(loginProvider, providerKey);
-                    RavenUser foundUser = await userLoginStore.FindAsync(loginInfo);
+                    IdentityUser foundUser = await userLoginStore.FindAsync(loginInfo);
 
                     // Assert
                     Assert.NotNull(foundUser);

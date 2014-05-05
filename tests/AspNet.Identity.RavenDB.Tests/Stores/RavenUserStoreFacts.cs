@@ -9,7 +9,7 @@ using Xunit;
 
 namespace AspNet.Identity.RavenDB.Tests.Stores
 {
-    public class RavenUserStoreFacts : TestBase
+    public class IdentityUserStoreFacts : TestBase
     {
         [Fact]
         public async Task Should_Create_User()
@@ -20,10 +20,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                await userStore.CreateAsync(new RavenUser(userName));
+                IUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                await userStore.CreateAsync(new IdentityUser(userName));
 
-                IUser user = (await ses.Query<RavenUser>()
+                IUser user = (await ses.Query<IdentityUser>()
                     .Where(usr => usr.UserName == userName)
                     .Take(1)
                     .ToListAsync()
@@ -33,28 +33,28 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             }
         }
 
-        [Fact]
-        public async Task CreateAsync_Should_Create_User_By_Putting_The_UserName_As_The_Key()
-        {
-            string userName = "Tugberk";
+        ////[Fact]
+        ////public async Task CreateAsync_Should_Create_User_By_Putting_The_UserName_As_The_Key()
+        ////{
+        ////    string userName = "Tugberk";
 
-            using (IDocumentStore store = CreateEmbeddableStore())
-            using (IAsyncDocumentSession ses = store.OpenAsyncSession())
-            {
-                ses.Advanced.UseOptimisticConcurrency = true;
-                IUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                await userStore.CreateAsync(new RavenUser(userName));
+        ////    using (IDocumentStore store = CreateEmbeddableStore())
+        ////    using (IAsyncDocumentSession ses = store.OpenAsyncSession())
+        ////    {
+        ////        ses.Advanced.UseOptimisticConcurrency = true;
+        ////        IUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+        ////        await userStore.CreateAsync(new IdentityUser(userName));
 
-                IUser user = (await ses.Query<RavenUser>()
-                    .Where(usr => usr.UserName == userName)
-                    .Take(1)
-                    .ToListAsync()
-                    .ConfigureAwait(false)).FirstOrDefault();
+        ////        IUser user = (await ses.Query<IdentityUser>()
+        ////            .Where(usr => usr.UserName == userName)
+        ////            .Take(1)
+        ////            .ToListAsync()
+        ////            .ConfigureAwait(false)).FirstOrDefault();
 
-                Assert.NotNull(user);
-                Assert.Equal(string.Format(Constants.RavenUserKeyTemplate, userName), user.Id);
-            }
-        }
+        ////        Assert.NotNull(user);
+        ////        Assert.Equal(string.Format(Constants.IdentityUserKeyTemplate, userName), user.Id);
+        ////    }
+        ////}
 
         [Fact]
         public async Task Should_Retrieve_User_By_UserName()
@@ -65,8 +65,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                await ses.StoreAsync(new RavenUser(userName));
+                IUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                await ses.StoreAsync(new IdentityUser(userName));
                 await ses.SaveChangesAsync();
 
                 IUser user = await userStore.FindByNameAsync(userName);
@@ -86,8 +86,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                await ses.StoreAsync(new RavenUser(userName));
+                IUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                await ses.StoreAsync(new IdentityUser(userName));
                 await ses.SaveChangesAsync();
 
                 IUser user = await userStore.FindByNameAsync(nonExistingUserName);
@@ -100,17 +100,17 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task Should_Retrieve_User_By_UserId()
         {
             string userName = "Tugberk";
-            string userId = "RavenUsers/Tugberk";
 
             using (IDocumentStore store = CreateEmbeddableStore())
             using (IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserStore<RavenUser> userStore = new RavenUserStore<RavenUser>(ses);
-                await ses.StoreAsync(new RavenUser(userName));
+                IUserStore<IdentityUser> userStore = new IdentityUserStore<IdentityUser>(ses);
+                var identityUser = new IdentityUser(userName);
+                await ses.StoreAsync(identityUser);
                 await ses.SaveChangesAsync();
 
-                IUser user = await userStore.FindByIdAsync(userId);
+                IUser user = await userStore.FindByIdAsync(identityUser.Id);
 
                 Assert.NotNull(user);
                 Assert.Equal(userName, user.UserName, StringComparer.InvariantCultureIgnoreCase);

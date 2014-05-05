@@ -57,15 +57,15 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Entities\RavenRole.cs" />
-    <Compile Include="Entities\RavenUserEmail.cs" />
+    <Compile Include="Entities\IdentityUserRole.cs" />
+    <Compile Include="Entities\IdentityUserEmail.cs" />
     <Compile Include="Entities\ConfirmationRecord.cs" />
-    <Compile Include="Entities\RavenUserPhoneNumber.cs" />
-    <Compile Include="Stores\RavenUserStore.cs" />
-    <Compile Include="Entities\RavenUserClaim.cs" />
-    <Compile Include="Entities\RavenUserLogin.cs" />
+    <Compile Include="Entities\IdentityUserPhoneNumber.cs" />
+    <Compile Include="Stores\IdentityUserStore.cs" />
+    <Compile Include="Entities\IdentityUserClaim.cs" />
+    <Compile Include="Entities\IdentityUserLogin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Entities\RavenUser.cs" />
+    <Compile Include="Entities\IdentityUser.cs" />
     <Compile Include="Stores\RoleStore.cs" />
   </ItemGroup>
   <ItemGroup>

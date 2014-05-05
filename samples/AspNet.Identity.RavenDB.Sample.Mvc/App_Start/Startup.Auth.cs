@@ -83,7 +83,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options,
             IOwinContext context)
         {
-            var manager = new ApplicationUserManager(new RavenUserStore<ApplicationUser>(context.GetAutofacLifetimeScope().Resolve<IAsyncDocumentSession>()));
+            var manager = new ApplicationUserManager(new IdentityUserStore<ApplicationUser>(context.GetAutofacLifetimeScope().Resolve<IAsyncDocumentSession>()));
 
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<ApplicationUser>(manager)
@@ -181,16 +181,16 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
         }
     }
     // Configure the RoleManager used in the application. RoleManager is defined in the ASP.NET Identity core assembly
-    public class ApplicationRoleManager : RoleManager<RavenRole>
+    public class ApplicationRoleManager : RoleManager<IdentityUserRole>
     {
-        public ApplicationRoleManager(IRoleStore<RavenRole, string> roleStore)
+        public ApplicationRoleManager(IRoleStore<IdentityUserRole, string> roleStore)
             : base(roleStore)
         {
         }
 
         public static ApplicationRoleManager Create(IdentityFactoryOptions<ApplicationRoleManager> options, IOwinContext context)
         {
-            var manager = new ApplicationRoleManager(new RoleStore<RavenRole>(context.GetAutofacLifetimeScope().Resolve<IAsyncDocumentSession>()));
+            var manager = new ApplicationRoleManager(new RoleStore<IdentityUserRole>(context.GetAutofacLifetimeScope().Resolve<IAsyncDocumentSession>()));
 
             return manager;
         }

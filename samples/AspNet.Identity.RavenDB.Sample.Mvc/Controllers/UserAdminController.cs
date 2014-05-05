@@ -71,9 +71,9 @@ namespace IdentitySample.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var user = await UserManager.FindByNameAsync(id);
+            var user = await UserManager.FindByIdAsync(id);
 
-            ViewBag.RoleNames = await UserManager.GetRolesAsync(user.Id);
+            ViewBag.RoleNames = user.Claims.Where(x => x.ClaimType == ClaimTypes.Role).Select(x => x.ClaimValue).ToList();
 
             return View(user);
         }
@@ -95,32 +95,26 @@ namespace IdentitySample.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser (userViewModel.Email, userViewModel.Email );
-                var adminresult = await UserManager.CreateAsync(user, userViewModel.Password);
+
 
                 //Add User to the selected Roles 
-                if (adminresult.Succeeded)
+                foreach (var claim in selectedRoles.Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
                 {
-                    if (selectedRoles != null)
-                    {
-                        var result = await UserManager.AddUserToRolesAsync(user.Id, selectedRoles);
-                        if (!result.Succeeded)
-                        {
-                            ModelState.AddModelError("", result.Errors.First());
-                            ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
-                            return View();
-                        }
-                    }
+                    user.Claims.Add(claim);
                 }
-                else
+
+                var adminresult = await UserManager.CreateAsync(user, userViewModel.Password);
+
+                if (!adminresult.Succeeded)
                 {
                     ModelState.AddModelError("", adminresult.Errors.First());
-                    ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
+                    ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
                     return View();
 
                 }
                 return RedirectToAction("Index");
             }
-            ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
+            ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
             return View();
         }
 
@@ -167,20 +161,20 @@ namespace IdentitySample.Controllers
                 }
 
                 user.UserName = editUser.Email;
-                user.SetEmail(editUser.Email);
+                user.Email = editUser.Email;
 
                 var userRoles = user.Claims.Where(c => c.ClaimType == ClaimTypes.Role).Select(c => c.ClaimValue).ToList();
 
                 selectedRole = selectedRole ?? new string[] { };
 
-                foreach (var claim in selectedRole.Except(userRoles).Select(x => new RavenUserClaim(ClaimTypes.Role, x)))
+                foreach (var claim in selectedRole.Except(userRoles).Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
                 {
-                    user.AddClaim(claim);
+                    user.Claims.Add(claim);
                 }
 
-                foreach (var claim in userRoles.Except(selectedRole).Select(x => new RavenUserClaim(ClaimTypes.Role, x)))
+                foreach (var claim in userRoles.Except(selectedRole).Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
                 {
-                    user.RemoveClaim(claim);
+                    user.Claims.Remove(claim);
                 }
 
                 var result = await UserManager.UpdateAsync(user);
@@ -205,7 +199,7 @@ namespace IdentitySample.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var user = await UserManager.FindByNameAsync(id);
+            var user = await UserManager.FindByIdAsync(id);
             if (user == null)
             {
                 return HttpNotFound();
@@ -226,7 +220,7 @@ namespace IdentitySample.Controllers
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
                 }
 
-                var user = await UserManager.FindByNameAsync(id);
+                var user = await UserManager.FindByIdAsync(id);
                 if (user == null)
                 {
                     return HttpNotFound();

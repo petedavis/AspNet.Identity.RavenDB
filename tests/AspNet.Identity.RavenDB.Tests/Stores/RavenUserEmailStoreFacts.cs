@@ -1,4 +1,5 @@
-﻿using AspNet.Identity.RavenDB.Entities;
+﻿using System.Runtime.Remoting;
+using AspNet.Identity.RavenDB.Entities;
 using AspNet.Identity.RavenDB.Stores;
 using Microsoft.AspNet.Identity;
 using Raven.Abstractions.Exceptions;
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace AspNet.Identity.RavenDB.Tests.Stores
 {
-    public class RavenUserEmailStoreFacts : TestBase
+    public class IdentityUserEmailStoreFacts : TestBase
     {
         // FindByEmailAsync
 
@@ -17,7 +18,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task FindByEmailAsync_Should_Return_The_Correct_User_If_Available()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -25,9 +26,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -35,8 +36,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = await userEmailStore.FindByEmailAsync(email);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = await userEmailStore.FindByEmailAsync(email);
 
                     Assert.NotNull(user);
                     Assert.Equal(userId, user.Id);
@@ -57,9 +58,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -67,8 +69,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser user = await userEmailStore.FindByEmailAsync(emailToLookFor);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = await userEmailStore.FindByEmailAsync(emailToLookFor);
 
                     Assert.Null(user);
                 }
@@ -81,7 +83,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task GetEmailAsync_Should_Return_User_Email_If_Available()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -89,9 +91,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -99,9 +101,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    string userEmail = await userEmailStore.GetEmailAsync(ravenUser);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
+                    Assert.NotNull(user);
+                    string userEmail = await userEmailStore.GetEmailAsync(user);
 
                     Assert.NotNull(userEmail);
                     Assert.Equal(email, userEmail);
@@ -113,14 +116,14 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task GetEmailAsync_Should_Return_Null_If_User_Email_Is_Not_Available()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
 
             using (IDocumentStore store = CreateEmbeddableStore())
             {
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName);
+                    IdentityUser user = new IdentityUser(userName);
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -128,9 +131,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    string userEmail = await userEmailStore.GetEmailAsync(ravenUser);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser identityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    Assert.NotNull(identityUser);
+                    string userEmail = await userEmailStore.GetEmailAsync(identityUser);
 
                     Assert.Null(userEmail);
                 }
@@ -143,7 +147,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task GetEmailConfirmedAsync_Should_Return_True_If_Email_Confirmed()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -151,10 +155,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
-                    userEmail.SetConfirmed();
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
+                    userEmail.SetConfirmed();
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -162,9 +166,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(ravenUser);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(IdentityUser);
 
                     Assert.True(isConfirmed);
                 }
@@ -175,7 +179,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task GetEmailConfirmedAsync_Should_Return_False_If_Email_Is_Not_Confirmed()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -183,9 +187,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -193,9 +197,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(ravenUser);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(IdentityUser);
 
                     Assert.False(isConfirmed);
                 }
@@ -206,14 +210,14 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task GetEmailConfirmedAsync_Should_Throw_InvalidOperationException_If_Email_Is_Not_Available()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
 
             using (IDocumentStore store = CreateEmbeddableStore())
             {
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName) { UserName = userName };
+                    IdentityUser user = new IdentityUser(userName) { UserName = userName };
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -221,12 +225,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
                     
                     await Assert.ThrowsAsync<InvalidOperationException>(async () => 
                     {
-                        bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(ravenUser);
+                        bool isConfirmed = await userEmailStore.GetEmailConfirmedAsync(IdentityUser);
                     });
                 }
             }
@@ -238,7 +242,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task SetEmailAsync_Should_Set_The_Email_Correctly()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string emailToSave = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -246,7 +250,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName) { UserName = userName };
+                    IdentityUser user = new IdentityUser(userName) { UserName = userName };
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -254,21 +258,21 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    await userEmailStore.SetEmailAsync(ravenUser, emailToSave);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    await userEmailStore.SetEmailAsync(IdentityUser, emailToSave);
                     await ses.SaveChangesAsync();
                 }
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    string keyToLookFor = RavenUserEmail.GenerateKey(emailToSave);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    RavenUserEmail userEmail = await ses.LoadAsync<RavenUserEmail>(keyToLookFor);
+                    string keyToLookFor = IdentityUserEmail.GenerateKey(emailToSave);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    IdentityUserEmail userEmail = await ses.LoadAsync<IdentityUserEmail>(keyToLookFor);
 
                     Assert.NotNull(userEmail);
-                    Assert.Equal(emailToSave, ravenUser.Email);
+                    Assert.Equal(emailToSave, IdentityUser.Email);
                     Assert.Equal(emailToSave, userEmail.Email);
                     Assert.Equal(userId, userEmail.UserId);
                 }
@@ -281,18 +285,19 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             const string userName = "Tugberk";
             const string email = "tugberk@example.com";
             const string userName2 = "Tugberk2";
-            const string userId2 = "RavenUsers/Tugberk2";
+            string userId2;
 
             using (IDocumentStore store = CreateEmbeddableStore())
             {
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUser user2 = new RavenUser(userName2);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUser user2 = new IdentityUser(userName2);
                     await ses.StoreAsync(user2);
+                    userId2 = user2.Id;
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -300,9 +305,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId2);
-                    await userEmailStore.SetEmailAsync(ravenUser, email);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId2);
+                    await userEmailStore.SetEmailAsync(IdentityUser, email);
 
                     await Assert.ThrowsAsync<ConcurrencyException>(async () =>
                     {
@@ -312,8 +317,8 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId2);
-                    Assert.Null(ravenUser.Email);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId2);
+                    Assert.Null(IdentityUser.Email);
                 }
             }
         }
@@ -324,7 +329,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task SetEmailConfirmedAsync_With_Confirmed_Param_True_Should_Set_The_Email_As_Confirmed_If_Not_Confirmed_Already()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -332,9 +337,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -342,17 +347,17 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    await userEmailStore.SetEmailConfirmedAsync(ravenUser, confirmed: true);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    await userEmailStore.SetEmailConfirmedAsync(IdentityUser, confirmed: true);
                     await ses.SaveChangesAsync();
                 }
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    string keyToLookFor = RavenUserEmail.GenerateKey(email);
-                    RavenUserEmail userEmail = await ses.LoadAsync<RavenUserEmail>(keyToLookFor);
+                    string keyToLookFor = IdentityUserEmail.GenerateKey(email);
+                    IdentityUserEmail userEmail = await ses.LoadAsync<IdentityUserEmail>(keyToLookFor);
 
                     Assert.NotNull(userEmail.ConfirmationRecord);
                     Assert.NotEqual(default(DateTimeOffset), userEmail.ConfirmationRecord.ConfirmedOn);
@@ -364,7 +369,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task SetEmailConfirmedAsync_With_Confirmed_Param_False_Should_Set_The_Email_As_Not_Confirmed_If_Confirmed_Already()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -372,10 +377,10 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
-                    userEmail.SetConfirmed();
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
+                    userEmail.SetConfirmed();
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -383,17 +388,17 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
-                    await userEmailStore.SetEmailConfirmedAsync(ravenUser, confirmed: false);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
+                    await userEmailStore.SetEmailConfirmedAsync(IdentityUser, confirmed: false);
                     await ses.SaveChangesAsync();
                 }
 
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    string keyToLookFor = RavenUserEmail.GenerateKey(email);
-                    RavenUserEmail userEmail = await ses.LoadAsync<RavenUserEmail>(keyToLookFor);
+                    string keyToLookFor = IdentityUserEmail.GenerateKey(email);
+                    IdentityUserEmail userEmail = await ses.LoadAsync<IdentityUserEmail>(keyToLookFor);
 
                     Assert.Null(userEmail.ConfirmationRecord);
                 }
@@ -404,7 +409,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task SetEmailConfirmedAsync_Should_Throw_InvalidOperationException_If_User_Email_Property_Is_Not_Available()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -412,9 +417,9 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName);
-                    RavenUserEmail userEmail = new RavenUserEmail(email, user.Id);
+                    IdentityUser user = new IdentityUser(userName);
                     await ses.StoreAsync(user);
+                    IdentityUserEmail userEmail = new IdentityUserEmail(email, user.Id);
                     await ses.StoreAsync(userEmail);
                     await ses.SaveChangesAsync();
                 }
@@ -422,12 +427,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
 
                     await Assert.ThrowsAsync<InvalidOperationException>(async () =>
                     {
-                        await userEmailStore.SetEmailConfirmedAsync(ravenUser, confirmed: true);
+                        await userEmailStore.SetEmailConfirmedAsync(IdentityUser, confirmed: true);
                     });
                 }
             }
@@ -437,7 +442,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
         public async Task SetEmailConfirmedAsync_Should_Throw_InvalidOperationException_If_User_Email_Property_Is_Available_But_UserEmail_Document_Not()
         {
             const string userName = "Tugberk";
-            const string userId = "RavenUsers/Tugberk";
+            const string userId = "IdentityUsers/1";
             const string email = "tugberk@example.com";
 
             using (IDocumentStore store = CreateEmbeddableStore())
@@ -445,7 +450,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    RavenUser user = new RavenUser(userName, email);
+                    IdentityUser user = new IdentityUser(userName, email);
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
                 }
@@ -453,12 +458,12 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserEmailStore<RavenUser> userEmailStore = new RavenUserStore<RavenUser>(ses);
-                    RavenUser ravenUser = await ses.LoadAsync<RavenUser>(userId);
+                    IUserEmailStore<IdentityUser> userEmailStore = new IdentityUserStore<IdentityUser>(ses);
+                    IdentityUser IdentityUser = await ses.LoadAsync<IdentityUser>(userId);
 
                     await Assert.ThrowsAsync<InvalidOperationException>(async () =>
                     {
-                        await userEmailStore.SetEmailConfirmedAsync(ravenUser, confirmed: true);
+                        await userEmailStore.SetEmailConfirmedAsync(IdentityUser, confirmed: true);
                     });
                 }
             }
