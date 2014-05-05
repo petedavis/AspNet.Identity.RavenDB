@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Security.Claims;
 using Microsoft.AspNet.Identity;
 using Raven.Client.UniqueConstraints;
-using Raven.Imports.Newtonsoft.Json;
 
 namespace AspNet.Identity.RavenDB.Entities
 {
     /// <summary>
     ///     Default RavenDB IUser implementation
     /// </summary>
-    public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IUser
+    public class IdentityUser : IdentityUser<IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IUser
     {
         /// <summary>
         ///     Constructor which creates a new Guid for the Id
@@ -31,9 +28,10 @@ namespace AspNet.Identity.RavenDB.Entities
         }
 
         /// <summary>
-        ///     Constructor that takes a userName
+        ///     Constructor that takes a userName and email
         /// </summary>
         /// <param name="userName"></param>
+        /// <param name="email"></param>
         public IdentityUser(string userName, string email)
             : this(userName)
         {
@@ -48,7 +46,7 @@ namespace AspNet.Identity.RavenDB.Entities
     /// <typeparam name="TLogin"></typeparam>
     /// <typeparam name="TRole"></typeparam>
     /// <typeparam name="TClaim"></typeparam>
-    public class IdentityUser<TKey, TLogin, TRole, TClaim> : IUser<TKey>
+    public class IdentityUser<TLogin, TRole, TClaim> : IUser<string>
         where TLogin : IdentityUserLogin
         where TRole : IdentityUserRole
         where TClaim : IdentityUserClaim
@@ -66,6 +64,7 @@ namespace AspNet.Identity.RavenDB.Entities
         /// <summary>
         ///     Email
         /// </summary>
+        [UniqueConstraint(CaseInsensitive = true)]
         public virtual string Email { get; set; }
 
         /// <summary>
@@ -131,11 +130,12 @@ namespace AspNet.Identity.RavenDB.Entities
         /// <summary>
         ///     User ID (Primary Key)
         /// </summary>
-        public virtual TKey Id { get; set; }
+        public virtual string Id { get; set; }
 
         /// <summary>
         ///     User name
         /// </summary>
+        [UniqueConstraint(CaseInsensitive = true)]
         public virtual string UserName { get; set; }
     }
 }
