@@ -449,9 +449,11 @@ namespace AspNet.Identity.RavenDB.Stores
         public Task<DateTimeOffset> GetLockoutEndDateAsync(TUser user)
         {
             if (user == null) throw new ArgumentNullException("user");
-            if (user.LockoutEndDateUtc == null) throw new InvalidOperationException("LockoutEndDate has no value.");
 
-            return Task.FromResult(user.LockoutEndDateUtc.Value);
+            return
+                Task.FromResult(user.LockoutEndDateUtc.HasValue
+                    ? user.LockoutEndDateUtc.Value
+                    : new DateTimeOffset());
         }
 
         public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset lockoutEnd)
