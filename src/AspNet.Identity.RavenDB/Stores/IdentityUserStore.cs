@@ -383,6 +383,7 @@ namespace AspNet.Identity.RavenDB.Stores
                 throw new InvalidOperationException("Cannot set the confirmation status of the e-mail because user doesn't have an e-mail as IdentityUserEmail document.");
             }
 
+            user.EmailConfirmed = confirmed;
             if (confirmed)
             {
                 userEmail.SetConfirmed();
