@@ -22,5 +22,23 @@ namespace AspNet.Identity.RavenDB.Entities
         {
             return string.Format(Constants.IdentityUserRolesKeyTemplate, roleName);
         }
+
+        protected bool Equals(IdentityUserRole other)
+        {
+            return string.Equals(Name.ToLowerInvariant(), other.Name.ToLowerInvariant());
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((IdentityUserRole) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Name != null ? Name.GetHashCode() : 0);
+        }
     }
 }

@@ -19,6 +19,7 @@ namespace AspNet.Identity.RavenDB.Stores
         IUserLockoutStore<TUser, string>,
         IUserEmailStore<TUser>,
         IUserPhoneNumberStore<TUser>,
+        IUserRoleStore<TUser>,
         IDisposable where TUser : IdentityUser
     {
         private readonly bool _disposeDocumentSession;
@@ -586,6 +587,40 @@ namespace AspNet.Identity.RavenDB.Stores
             return (userPhoneNumber != null)
                 ? userPhoneNumber.ConfirmationRecord
                 : null;
+        }
+
+        public Task AddToRoleAsync(TUser user, string roleName)
+        {
+            if (user == null) throw new ArgumentNullException("user");
+            if (roleName == null) throw new ArgumentNullException("roleName");
+            var role = new IdentityUserRole(roleName);
+            if (!user.Roles.Contains(role))
+            {
+                user.Roles.Add(role);
+            }
+            return Task.FromResult(0);
+        }
+
+        public Task RemoveFromRoleAsync(TUser user, string roleName)
+        {
+            if (user == null) throw new ArgumentNullException("user");
+            if (roleName == null) throw new ArgumentNullException("roleName");
+
+            var role = new IdentityUserRole(roleName);
+            user.Roles.Remove(role);
+
+            return Task.FromResult(0);
+        }
+
+        public Task<IList<string>> GetRolesAsync(TUser user)
+        {
+            return Task.FromResult((IList<string>)user.Roles.Select(x => x.Name).ToList());
+        }
+
+        public Task<bool> IsInRoleAsync(TUser user, string roleName)
+        {
+            string lowerInvariant = roleName.ToLowerInvariant();
+            return Task.FromResult(user.Roles.Any(x => x.Name.ToLowerInvariant().Equals(lowerInvariant)));
         }
     }
 }
