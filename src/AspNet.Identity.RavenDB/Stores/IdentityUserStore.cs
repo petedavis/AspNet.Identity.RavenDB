@@ -73,6 +73,14 @@ namespace AspNet.Identity.RavenDB.Stores
             }
 
             await _documentSession.StoreAsync(user).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                // Store the email address to ensure it is unique.
+                var userEmail = new IdentityUserEmail(user.Email, user.Id);
+                await _documentSession.StoreAsync(userEmail).ConfigureAwait(false);
+            }
+            
             await _documentSession.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -116,15 +124,24 @@ namespace AspNet.Identity.RavenDB.Stores
             return _documentSession.SaveChangesAsync();
         }
 
-        public Task DeleteAsync(TUser user)
+        public async Task DeleteAsync(TUser user)
         {
             if (user == null)
             {
                 throw new ArgumentNullException("user");
             }
 
-            _documentSession.Delete<TUser>(user);
-            return _documentSession.SaveChangesAsync();
+            _documentSession.Delete(user);
+
+            if (!string.IsNullOrEmpty(user.Email))
+            {
+                // Delete the associated email document.
+                var key = IdentityUserEmail.GenerateKey(user.Email);
+                var identityEmail = await _documentSession.LoadAsync<IdentityUserEmail>(key).ConfigureAwait(false);
+                _documentSession.Delete(identityEmail);
+            }
+
+            await _documentSession.SaveChangesAsync().ConfigureAwait(false);
         }
 
         // IUserLoginStore
