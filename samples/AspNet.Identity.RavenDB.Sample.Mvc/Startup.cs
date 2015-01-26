@@ -17,11 +17,10 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
     {
         public void Configuration(IAppBuilder app)
         {
-            ConfigureAuth(app);
+            const string RavenDefaultDatabase = "AspNetAspNet.Identity.RavenDB.Sample.Mvc";
 
-
-            const string RavenDefaultDatabase = "AspNetIdentitySample";
-            ContainerBuilder builder = new ContainerBuilder();
+            // Configure AutoFac
+            var builder = new ContainerBuilder();
             builder.Register(c =>
             {
                 var store = new DocumentStore
@@ -46,16 +45,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 var session = c.Resolve<IDocumentStore>().OpenAsyncSession();
                 session.Advanced.UseOptimisticConcurrency = true;
                 return session;
-            }).As<IAsyncDocumentSession>().InstancePerHttpRequest();
+            }).As<IAsyncDocumentSession>().InstancePerRequest();
             
             builder.RegisterControllers(Assembly.GetExecutingAssembly());
-
 
             app.UseAutofacMiddleware(builder.Build());
             app.UseAutofacMvc();
 
-            app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
-            app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
+            ConfigureAuth(app);
 
             AutoMapperConfiguration.Configure();
         }

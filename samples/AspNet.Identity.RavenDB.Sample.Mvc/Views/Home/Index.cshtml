@@ -5,7 +5,7 @@
 <div class="jumbotron">
     <h1>ASP.NET Identity</h1>
     <p class="lead">ASP.NET Identity is the membership system for ASP.NET apps. Following are the features of ASP.NET Identity in this sample application.</p>
-    <p><a href="http://www.asp.net/aspnet/identity" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+    <p><a href="http://www.asp.net/identity" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
 </div>
 
 <div class="row">
@@ -64,14 +64,16 @@
             <dd>
                 You can the support so that users can login using their Facebook, Google, Twitter, Microsoft Account and more.
             </dd>
-            <ul>
-                <li>
-                    <a href="http://www.windowsazure.com/en-us/documentation/articles/web-sites-dotnet-deploy-aspnet-mvc-app-membership-oauth-sql-database/">Add Social Logins</a>
-                </li>
-                <li>
-                    <a href="http://blogs.msdn.com/b/webdev/archive/2013/10/16/get-more-information-from-social-providers-used-in-the-vs-2013-project-templates.aspx">Get more data about the user when they login suing Facebook</a>
-                </li>
-            </ul>
+            <dd>
+                <ul>
+                    <li>
+                        <a href="http://www.windowsazure.com/en-us/documentation/articles/web-sites-dotnet-deploy-aspnet-mvc-app-membership-oauth-sql-database/">Add Social Logins</a>
+                    </li>
+                    <li>
+                        <a href="http://blogs.msdn.com/b/webdev/archive/2013/10/16/get-more-information-from-social-providers-used-in-the-vs-2013-project-templates.aspx">Get more data about the user when they login suing Facebook</a>
+                    </li>
+                </ul>
+            </dd>
         </dl>
     </div>
     <div class="col-md-4">
@@ -153,9 +155,9 @@
         <dl>
             <dt>Account Lockout</dt>
             <dd>
-            Provide a way to Lockout out the user if the user enters their password or two-factor codes incorrectly. 
+                Provide a way to Lockout out the user if the user enters their password or two-factor codes incorrectly.
                 The number of invalid attempts and the timespan for the users are locked out can be configured.
-                A developer can optionally turn off Account Lockout for certain user accounts should they need to.    
+                A developer can optionally turn off Account Lockout for certain user accounts should they need to.
             </dd>
             <ul>
                 <li>Account LockOut settings can be configured in the UserManager in IdentityConfig.cs</li>
@@ -170,9 +172,11 @@
                 This is needed to ensure that any tokens generated with the old password are invalidated. In the sample project, if you change the users password then a new token is generated for the user and any previous tokens are invalidated.
                 This feature provides an extra layer of security to your application since when you change your password, you will be logged out from everywhere (all other browsers) where you have logged into this application.
             </dd>
-            <ul>
-                <li>The provider is registered when you add CookieAuthentication in StartupAuth to your application.</li>
-            </ul>
+            <dd>
+                <ul>
+                    <li>The provider is registered when you add CookieAuthentication in StartupAuth to your application.</li>
+                </ul>
+            </dd>
         </dl>
     </div>
     <div class="col-md-4">
@@ -190,13 +194,15 @@
                 You can extend ASP.NET Identity to write your own custom storage provider for storing the ASP.NET Identity system and user data
                 in a persistance system of your choice such as MondoDb, RavenDb, Azure Table Storage etc.
             </dd>
-            <ul>
-                <li>
-                    <a href="http://www.asp.net/identity/overview/extensibility/overview-of-custom-storage-providers-for-aspnet-identity">
-                        learn more on how to implement your own storage provider
-                    </a>
-                </li>
-            </ul>
+            <dd>
+                <ul>
+                    <li>
+                        <a href="http://www.asp.net/identity/overview/extensibility/overview-of-custom-storage-providers-for-aspnet-identity">
+                            learn more on how to implement your own storage provider
+                        </a>
+                    </li>
+                </ul>
+            </dd>
         </dl>
     </div>
     <div class="col-md-4">

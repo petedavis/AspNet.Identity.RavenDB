@@ -30,7 +30,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                     // Act
                     ses.Advanced.UseOptimisticConcurrency = true;
                     IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
-                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new IdentityUserStore<IdentityUser>(ses);
+                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new UserStore<IdentityUser>(ses);
                     bool isTwoFactorEnabled = await userTwoFactorStore.GetTwoFactorEnabledAsync(user);
 
                     // Assert
@@ -60,7 +60,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                     // Act
                     ses.Advanced.UseOptimisticConcurrency = true;
                     IdentityUser user = await ses.LoadAsync<IdentityUser>(userId);
-                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new IdentityUserStore<IdentityUser>(ses);
+                    IUserTwoFactorStore<IdentityUser, string> userTwoFactorStore = new UserStore<IdentityUser>(ses);
                     await userTwoFactorStore.SetTwoFactorEnabledAsync(user, enabled: true);
 
                     // Assert

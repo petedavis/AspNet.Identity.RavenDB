@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Globalization;
+using AspNet.Identity.RavenDB.Sample.Mvc.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
+using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using AspNet.Identity.RavenDB.Sample.Mvc.Models;
-using AspNet.Identity.RavenDB.Stores;
-using Raven.Client;
 
 namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 {
@@ -21,9 +19,10 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         {
         }
 
-        public AccountController(ApplicationUserManager userManager)
+        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
         {
             UserManager = userManager;
+            SignInManager = signInManager;
         }
 
         private ApplicationUserManager _userManager;
@@ -48,18 +47,15 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
             return View();
         }
 
-        private SignInHelper _helper;
+        private ApplicationSignInManager _signInManager;
 
-        private SignInHelper SignInHelper
+        public ApplicationSignInManager SignInManager
         {
             get
             {
-                if (_helper == null)
-                {
-                    _helper = new SignInHelper(UserManager, AuthenticationManager);
-                }
-                return _helper;
+                return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
+            private set { _signInManager = value; }
         }
 
         //
@@ -76,14 +72,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 
             // This doen't count login failures towards lockout only two factor authentication
             // To enable password failures to trigger lockout, change to shouldLockout: true
-            var result = await SignInHelper.PasswordSignIn(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
             switch (result)
             {
                 case SignInStatus.Success:
                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
-                case SignInStatus.RequiresTwoFactorAuthentication:
+                case SignInStatus.RequiresVerification:
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl });
                 case SignInStatus.Failure:
                 default:
@@ -98,14 +94,13 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         public async Task<ActionResult> VerifyCode(string provider, string returnUrl)
         {
             // Require that the user has already logged in via username/password or external login
-            if (!await SignInHelper.HasBeenVerified())
+            if (!await SignInManager.HasBeenVerifiedAsync())
             {
                 return View("Error");
             }
-            var user = await UserManager.FindByIdAsync(await SignInHelper.GetVerifiedUserIdAsync());
+            var user = await UserManager.FindByIdAsync(await SignInManager.GetVerifiedUserIdAsync());
             if (user != null)
             {
-                // To exercise the flow without actually sending codes, uncomment the following line
                 ViewBag.Status = "For DEMO purposes the current " + provider + " code is: " + await UserManager.GenerateTwoFactorTokenAsync(user.Id, provider);
             }
             return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl });
@@ -123,7 +118,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
                 return View(model);
             }
 
-            var result = await SignInHelper.TwoFactorSignIn(model.Provider, model.Code, isPersistent: false, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: false, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -154,7 +149,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser(model.Email, model.Email );
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -181,12 +176,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
                 return View("Error");
             }
             var result = await UserManager.ConfirmEmailAsync(userId, code);
-            if (result.Succeeded)
-            {
-                return View("ConfirmEmail");
-            }
-            AddErrors(result);
-            return View();
+            return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
         //
@@ -290,7 +280,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> SendCode(string returnUrl)
         {
-            var userId = await SignInHelper.GetVerifiedUserIdAsync();
+            var userId = await SignInManager.GetVerifiedUserIdAsync();
             if (userId == null)
             {
                 return View("Error");
@@ -307,13 +297,13 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> SendCode(SendCodeViewModel model)
         {
-            // Generate the token and send it
             if (!ModelState.IsValid)
             {
                 return View();
             }
 
-            if (!await SignInHelper.SendTwoFactorCode(model.SelectedProvider))
+            // Generate the token and send it
+            if (!await SignInManager.SendTwoFactorCodeAsync(model.SelectedProvider))
             {
                 return View("Error");
             }
@@ -332,14 +322,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
             }
 
             // Sign in the user with this external login provider if the user already has a login
-            var result = await SignInHelper.ExternalSignIn(loginInfo, isPersistent: false);
+            var result = await SignInManager.ExternalSignInAsync(loginInfo, isPersistent: false);
             switch (result)
             {
                 case SignInStatus.Success:
                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
-                case SignInStatus.RequiresTwoFactorAuthentication:
+                case SignInStatus.RequiresVerification:
                     return RedirectToAction("SendCode", new { ReturnUrl = returnUrl });
                 case SignInStatus.Failure:
                 default:
@@ -370,14 +360,14 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser (model.Email, model.Email );
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     result = await UserManager.AddLoginAsync(user.Id, info.Login);
                     if (result.Succeeded)
                     {
-                        await SignInHelper.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                         return RedirectToLocal(returnUrl);
                     }
                 }
@@ -404,16 +394,6 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         public ActionResult ExternalLoginFailure()
         {
             return View();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _userManager != null)
-            {
-                _userManager.Dispose();
-                _userManager = null;
-            }
-            base.Dispose(disposing);
         }
 
         #region Helpers

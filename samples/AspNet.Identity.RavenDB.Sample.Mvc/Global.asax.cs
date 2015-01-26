@@ -71,8 +71,8 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
             using (var documentSession = documentStore.OpenAsyncSession())
             {
                 documentSession.Advanced.UseOptimisticConcurrency = true;
-                var userManager = new ApplicationUserManager(new IdentityUserStore<ApplicationUser>(documentSession, false));
-                var roleManager = new ApplicationRoleManager(new RoleStore<IdentityUserRole>(documentSession));
+                var userManager = new ApplicationUserManager(new UserStore<ApplicationUser>(documentSession, false));
+                var roleManager = new ApplicationRoleManager(new RoleStore<IdentityRole>(documentSession));
                 const string name = "admin@admin.com";
                 const string password = "Admin@123456";
                 const string roleName = "Admin";
@@ -82,7 +82,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 var role = roleManager.FindByName(roleName);
                 if (role == null)
                 {
-                    role = new IdentityUserRole(roleName);
+                    role = new IdentityRole(roleName);
                     var roleresult = roleManager.Create(role);
                     saveRequired = true;
                 }
@@ -90,7 +90,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc
                 var user = userManager.FindByName(name);
                 if (user == null)
                 {
-                    user = new ApplicationUser(name, name);
+                    user = new ApplicationUser {UserName = name, Email = name};
                     var result = userManager.Create(user, password);
                     result = userManager.SetLockoutEnabled(user.Id, false);
                     saveRequired = true;

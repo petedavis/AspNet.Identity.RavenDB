@@ -34,18 +34,19 @@
   <ItemGroup>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Core.2.0.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.AspNet.Identity.Core.2.1.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Abstractions, Version=2.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\RavenDB.Client.2.5.2874\lib\net45\Raven.Abstractions.dll</HintPath>
+      <HintPath>..\..\packages\RavenDB.Client.2.5.2952\lib\net45\Raven.Abstractions.dll</HintPath>
     </Reference>
     <Reference Include="Raven.Client.Lightweight, Version=2.5.0.0, Culture=neutral, PublicKeyToken=37f41c7f99471593, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\RavenDB.Client.2.5.2874\lib\net45\Raven.Client.Lightweight.dll</HintPath>
+      <HintPath>..\..\packages\RavenDB.Client.2.5.2952\lib\net45\Raven.Client.Lightweight.dll</HintPath>
     </Reference>
-    <Reference Include="Raven.Client.UniqueConstraints">
-      <HintPath>..\..\packages\RavenDB.Client.UniqueConstraints.2.5.2874\lib\net45\Raven.Client.UniqueConstraints.dll</HintPath>
+    <Reference Include="Raven.Client.UniqueConstraints, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\RavenDB.Client.UniqueConstraints.2.5.2952\lib\net45\Raven.Client.UniqueConstraints.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -57,11 +58,11 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Entities\IdentityUserRole.cs" />
+    <Compile Include="Entities\IdentityRole.cs" />
     <Compile Include="Entities\IdentityUserEmail.cs" />
     <Compile Include="Entities\ConfirmationRecord.cs" />
     <Compile Include="Entities\IdentityUserPhoneNumber.cs" />
-    <Compile Include="Stores\IdentityUserStore.cs" />
+    <Compile Include="Stores\UserStore.cs" />
     <Compile Include="Entities\IdentityUserClaim.cs" />
     <Compile Include="Entities\IdentityUserLogin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

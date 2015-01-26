@@ -57,7 +57,7 @@ namespace AspNet.Identity.RavenDB.Stores
         {
             if (roleName == null) throw new ArgumentNullException("roleName");
 
-            return _documentSession.LoadAsync<TRole>(IdentityUserRole.GenerateKey(roleName));
+            return _documentSession.LoadAsync<TRole>(IdentityRole.GenerateKey(roleName));
         }
 
         public IQueryable<TRole> Roles

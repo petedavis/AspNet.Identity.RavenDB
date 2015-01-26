@@ -1,4 +1,4 @@
-@model AspNet.Identity.RavenDB.Sample.Mvc.Models.IndexViewModel
+﻿@model AspNet.Identity.RavenDB.Sample.Mvc.Models.IndexViewModel
 @{
     ViewBag.Title = "Manage your account";
 }
@@ -8,21 +8,25 @@
 <div class="row">
     <div class="col-md-8">
         <p>
-            @if (Model.HasPassword) {
+            @if (Model.HasPassword)
+            {
                 @Html.ActionLink("Change your password", "ChangePassword")
             }
-            else {
+            else
+            {
                 @Html.ActionLink("Pick a password", "SetPassword")
             }
         </p>
         <p>
             Phone Number: @(Model.PhoneNumber ?? "None") [
-            @if (Model.PhoneNumber != null) {
+            @if (Model.PhoneNumber != null)
+            {
                 @Html.ActionLink("Change", "AddPhoneNumber")
                 @: &nbsp;|&nbsp;
                 @Html.ActionLink("Remove", "RemovePhoneNumber")
             }
-            else {
+            else
+            {
                 @Html.ActionLink("Add", "AddPhoneNumber")
             }
             ]
@@ -31,23 +35,41 @@
             External Logins: @Model.Logins.Count
             @Html.ActionLink("[Manage]", "ManageLogins")
         </p>
-        <p>
-            Two Factor Enabled: @(Model.TwoFactor)
-            @if (Model.TwoFactor) {
-                @Html.ActionLink("[Disable]", "DisableTFA")
-            }
-            else {
-                @Html.ActionLink("[Enable]", "EnableTFA")
-            }
-        </p>
-        <p>
-            Two Factor Browser Remembered?: @Model.BrowserRemembered
-            @if (Model.BrowserRemembered) {
-                @Html.ActionLink("[Forget]", "ForgetBrowser")
-            }
-            else {
-                @Html.ActionLink("[Remember]", "RememberBrowser")
-            }
-        </p>
+        @if (Model.TwoFactor)
+        {
+            <form method="post" action="/Manage/DisableTFA">
+                <p>
+                    Two factor is currently enabled:
+                    <input type="submit" value="Disable" class="btn btn-default"/>
+                </p>
+            </form>
+        }
+        else
+        {
+            <form method="post" action="/Manage/EnableTFA">
+                <p>
+                    Two factor is currently disabled:
+                    <input type="submit" value="Enable" class="btn btn-default"/>
+                </p>
+            </form>
+        }
+        @if (Model.BrowserRemembered)
+        {
+            <form method="post" action="/Manage/ForgetBrowser">
+                <p>
+                    Browser is curently remembered for two factor:
+                    <input type="submit" value="Forget Browser" class="btn btn-default" />
+                </p>
+            </form>
+        }
+        else
+        {
+            <form method="post" action="/Manage/RememberBrowser">
+                <p>
+                    Browser is curently not remembered for two factor:
+                    <input type="submit" value="Remember Browser" class="btn btn-default"/>
+                </p>
+            </form>
+        }
     </div>
 </div>

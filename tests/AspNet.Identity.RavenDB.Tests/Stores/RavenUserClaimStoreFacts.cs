@@ -34,7 +34,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserClaimStore<IdentityUser> userClaimStore = new IdentityUserStore<IdentityUser>(ses);
+                    IUserClaimStore<IdentityUser> userClaimStore = new UserStore<IdentityUser>(ses);
 
                     await ses.StoreAsync(user);
                     await ses.SaveChangesAsync();
@@ -43,7 +43,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
                 using (IAsyncDocumentSession ses = store.OpenAsyncSession())
                 {
                     ses.Advanced.UseOptimisticConcurrency = true;
-                    IUserClaimStore<IdentityUser> userClaimStore = new IdentityUserStore<IdentityUser>(ses);
+                    IUserClaimStore<IdentityUser> userClaimStore = new UserStore<IdentityUser>(ses);
                     IEnumerable<Claim> retrievedClaims = await userClaimStore.GetClaimsAsync(user);
 
                     Assert.Equal(2, claims.Count());
@@ -62,7 +62,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using (IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserClaimStore<IdentityUser> userClaimStore = new IdentityUserStore<IdentityUser>(ses, false);
+                IUserClaimStore<IdentityUser> userClaimStore = new UserStore<IdentityUser>(ses, false);
                 IdentityUser user = new IdentityUser(userName);
 
                 await ses.StoreAsync(user);
@@ -85,7 +85,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             using(IAsyncDocumentSession ses = store.OpenAsyncSession())
             {
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserClaimStore<IdentityUser> userClaimStore = new IdentityUserStore<IdentityUser>(ses, false);
+                IUserClaimStore<IdentityUser> userClaimStore = new UserStore<IdentityUser>(ses, false);
                 IdentityUser user = new IdentityUser(userName);
 
                 await ses.StoreAsync(user);
@@ -110,7 +110,7 @@ namespace AspNet.Identity.RavenDB.Tests.Stores
             {
                 // Arrange
                 ses.Advanced.UseOptimisticConcurrency = true;
-                IUserClaimStore<IdentityUser> userClaimStore = new IdentityUserStore<IdentityUser>(ses, false);
+                IUserClaimStore<IdentityUser> userClaimStore = new UserStore<IdentityUser>(ses, false);
                 IdentityUser user = new IdentityUser(userName);
 
                 Claim claimToAddAndRemove = new Claim(ClaimTypes.Role, "Customer");

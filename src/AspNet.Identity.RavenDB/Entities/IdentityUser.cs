@@ -8,7 +8,7 @@ namespace AspNet.Identity.RavenDB.Entities
     /// <summary>
     ///     Default RavenDB IUser implementation
     /// </summary>
-    public class IdentityUser : IdentityUser<IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IUser
+    public class IdentityUser : IdentityUser<IdentityUserLogin, IdentityRole, IdentityUserClaim>, IUser
     {
         /// <summary>
         ///     Constructor which creates a new Guid for the Id
@@ -48,7 +48,7 @@ namespace AspNet.Identity.RavenDB.Entities
     /// <typeparam name="TClaim"></typeparam>
     public class IdentityUser<TLogin, TRole, TClaim> : IUser<string>
         where TLogin : IdentityUserLogin
-        where TRole : IdentityUserRole
+        where TRole : IdentityRole
         where TClaim : IdentityUserClaim
     {
         /// <summary>

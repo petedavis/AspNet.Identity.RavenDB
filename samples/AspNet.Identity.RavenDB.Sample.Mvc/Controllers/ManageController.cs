@@ -1,11 +1,11 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using AspNet.Identity.RavenDB.Sample.Mvc.Models;
+﻿using AspNet.Identity.RavenDB.Sample.Mvc.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
 
 namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 {
@@ -99,49 +99,6 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         }
 
         //
-        // GET: /Manage/RememberBrowser
-        public ActionResult RememberBrowser()
-        {
-            var rememberBrowserIdentity = AuthenticationManager.CreateTwoFactorRememberBrowserIdentity(User.Identity.GetUserId());
-            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, rememberBrowserIdentity);
-            return RedirectToAction("Index", "Manage");
-        }
-
-        //
-        // GET: /Manage/ForgetBrowser
-        public ActionResult ForgetBrowser()
-        {
-            AuthenticationManager.SignOut(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
-            return RedirectToAction("Index", "Manage");
-        }
-
-        //
-        // GET: /Manage/EnableTFA
-        public async Task<ActionResult> EnableTFA()
-        {
-            await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), true);
-            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user != null)
-            {
-                await SignInAsync(user, isPersistent: false);
-            }
-            return RedirectToAction("Index", "Manage");
-        }
-
-        //
-        // GET: /Manage/DisableTFA
-        public async Task<ActionResult> DisableTFA()
-        {
-            await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), false);
-            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-            if (user != null)
-            {
-                await SignInAsync(user, isPersistent: false);
-            }
-            return RedirectToAction("Index", "Manage");
-        }
-
-        //
         // POST: /Account/AddPhoneNumber
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -151,7 +108,6 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
             {
                 return View(model);
             }
-            // Send result of: UserManager.GetPhoneNumberCodeAsync(User.Identity.GetUserId(), phoneNumber);
             // Generate the token and send it
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), model.Number);
             if (UserManager.SmsService != null)
@@ -167,13 +123,60 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         }
 
         //
+        // POST: /Manage/RememberBrowser
+        [HttpPost]
+        public ActionResult RememberBrowser()
+        {
+            var rememberBrowserIdentity = AuthenticationManager.CreateTwoFactorRememberBrowserIdentity(User.Identity.GetUserId());
+            AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = true }, rememberBrowserIdentity);
+            return RedirectToAction("Index", "Manage");
+        }
+
+        //
+        // POST: /Manage/ForgetBrowser
+        [HttpPost]
+        public ActionResult ForgetBrowser()
+        {
+            AuthenticationManager.SignOut(DefaultAuthenticationTypes.TwoFactorRememberBrowserCookie);
+            return RedirectToAction("Index", "Manage");
+        }
+
+        //
+        // POST: /Manage/EnableTFA
+        [HttpPost]
+        public async Task<ActionResult> EnableTFA()
+        {
+            await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), true);
+            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
+            if (user != null)
+            {
+                await SignInAsync(user, isPersistent: false);
+            }
+            return RedirectToAction("Index", "Manage");
+        }
+
+        //
+        // POST: /Manage/DisableTFA
+        [HttpPost]
+        public async Task<ActionResult> DisableTFA()
+        {
+            await UserManager.SetTwoFactorEnabledAsync(User.Identity.GetUserId(), false);
+            var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
+            if (user != null)
+            {
+                await SignInAsync(user, isPersistent: false);
+            }
+            return RedirectToAction("Index", "Manage");
+        }
+
+        //
         // GET: /Account/VerifyPhoneNumber
         public async Task<ActionResult> VerifyPhoneNumber(string phoneNumber)
         {
             // This code allows you exercise the flow without actually sending codes
             // For production use please register a SMS provider in IdentityConfig and generate a code here.
             var code = await UserManager.GenerateChangePhoneNumberTokenAsync(User.Identity.GetUserId(), phoneNumber);
-            ViewBag.Status = "For DEMO purposes only, the current code is " + code ;
+            ViewBag.Status = "For DEMO purposes only, the current code is " + code;
             return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
         }
 
@@ -209,7 +212,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
             var result = await UserManager.SetPhoneNumberAsync(User.Identity.GetUserId(), null);
             if (!result.Succeeded)
             {
-                return RedirectToAction("Index", new {Message = ManageMessageId.Error});
+                return RedirectToAction("Index", new { Message = ManageMessageId.Error });
             }
             var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
             if (user != null)
@@ -326,16 +329,6 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
             }
             var result = await UserManager.AddLoginAsync(User.Identity.GetUserId(), loginInfo.Login);
             return result.Succeeded ? RedirectToAction("ManageLogins") : RedirectToAction("ManageLogins", new { Message = ManageMessageId.Error });
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _userManager != null)
-            {
-                _userManager.Dispose();
-                _userManager = null;
-            }
-            base.Dispose(disposing);
         }
 
         #region Helpers

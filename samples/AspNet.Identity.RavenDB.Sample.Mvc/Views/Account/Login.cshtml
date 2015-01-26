@@ -1,5 +1,4 @@
-@using AspNet.Identity.RavenDB.Sample.Mvc.Models
-@model AspNet.Identity.RavenDB.Sample.Mvc.Models.LoginViewModel
+﻿@model AspNet.Identity.RavenDB.Sample.Mvc.Models.LoginViewModel
 
 @{
     ViewBag.Title = "Log in";
@@ -52,7 +51,7 @@
     </div>
     <div class="col-md-4">
         <section id="socialLoginForm">
-            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+            @Html.Partial("_ExternalLoginsListPartial", new AspNet.Identity.RavenDB.Sample.Mvc.Models.ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
         </section>
     </div>
 </div>

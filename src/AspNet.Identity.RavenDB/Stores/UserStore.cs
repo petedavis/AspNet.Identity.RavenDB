@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AspNet.Identity.RavenDB.Stores
 {
-    public class IdentityUserStore<TUser> : IUserStore<TUser>,
+    public class UserStore<TUser> : IUserStore<TUser>,
         IUserLoginStore<TUser>,
         IUserClaimStore<TUser>,
         IUserPasswordStore<TUser>,
@@ -25,12 +25,12 @@ namespace AspNet.Identity.RavenDB.Stores
         private readonly bool _disposeDocumentSession;
         private readonly IAsyncDocumentSession _documentSession;
 
-        public IdentityUserStore(IAsyncDocumentSession documentSession)
+        public UserStore(IAsyncDocumentSession documentSession)
             : this(documentSession, true)
         {
         }
 
-        public IdentityUserStore(IAsyncDocumentSession documentSession, bool disposeDocumentSession)
+        public UserStore(IAsyncDocumentSession documentSession, bool disposeDocumentSession)
         {
             if (documentSession == null)
             {
@@ -594,7 +594,7 @@ namespace AspNet.Identity.RavenDB.Stores
         {
             if (user == null) throw new ArgumentNullException("user");
             if (roleName == null) throw new ArgumentNullException("roleName");
-            var role = new IdentityUserRole(roleName);
+            var role = new IdentityRole(roleName);
             if (!user.Roles.Contains(role))
             {
                 user.Roles.Add(role);
@@ -607,7 +607,7 @@ namespace AspNet.Identity.RavenDB.Stores
             if (user == null) throw new ArgumentNullException("user");
             if (roleName == null) throw new ArgumentNullException("roleName");
 
-            var role = new IdentityUserRole(roleName);
+            var role = new IdentityRole(roleName);
             user.Roles.Remove(role);
 
             return Task.FromResult(0);

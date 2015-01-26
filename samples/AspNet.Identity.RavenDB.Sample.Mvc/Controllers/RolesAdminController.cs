@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using AspNet.Identity.RavenDB.Entities;
+using AspNet.Identity.RavenDB.Sample.Mvc.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using AspNet.Identity.RavenDB.Entities;
-using AspNet.Identity.RavenDB.Sample.Mvc.Models;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
-using Raven.Client;
+using System.Collections.Generic;
 
 namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 {
@@ -19,7 +18,8 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         {
         }
 
-        public RolesAdminController(ApplicationUserManager userManager, ApplicationRoleManager roleManager)
+        public RolesAdminController(ApplicationUserManager userManager,
+            ApplicationRoleManager roleManager)
         {
             UserManager = userManager;
             RoleManager = roleManager;
@@ -53,10 +53,9 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 
         //
         // GET: /Roles/
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var model = await RoleManager.Roles.ToListAsync();
-            return View(model);
+            return View(RoleManager.Roles);
         }
 
         //
@@ -99,7 +98,7 @@ namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                var role = new IdentityUserRole(roleViewModel.Name);
+                var role = new IdentityRole(roleViewModel.Name);
                 var roleresult = await RoleManager.CreateAsync(role);
                 if (!roleresult.Succeeded)
                 {

@@ -1,5 +1,4 @@
-﻿@using System.Activities.Statements
-@model AspNet.Identity.RavenDB.Sample.Mvc.Models.UsersViewModel
+﻿@model IEnumerable<AspNet.Identity.RavenDB.Sample.Mvc.Models.ApplicationUser>
 
 @{
     ViewBag.Title = "Index";
@@ -10,33 +9,28 @@
 <p>
     @Html.ActionLink("Create New", "Create")
 </p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.UserName)
+        </th>
+        <th>
 
-@if (Model.Users.Any())
-{
-    var meta = Model.Users.First();
-    <table class="table">
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
         <tr>
-            <th>
-                @Html.DisplayNameFor(m => meta.UserName)
-            </th>
-            <th>
-
-            </th>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </td>
         </tr>
+    }
 
-        @foreach (var item in Model.Users)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UserName)
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new {id = item.Id}) |
-                    @Html.ActionLink("Details", "Details", new {id = item.Id}) |
-                    @Html.ActionLink("Delete", "Delete", new {id = item.Id})
-                </td>
-            </tr>
-        }
-
-    </table>
-}
+</table>

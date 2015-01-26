@@ -15,7 +15,7 @@ using System.Web;
 using System.Web.Mvc;
 using Raven.Client;
 
-namespace IdentitySample.Controllers
+namespace AspNet.Identity.RavenDB.Sample.Mvc.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class UsersAdminController : Controller
@@ -60,7 +60,7 @@ namespace IdentitySample.Controllers
         // GET: /Users/
         public async Task<ActionResult> Index()
         {
-            return ListView(await UserManager.Users.ToListAsync());
+            return View(await UserManager.Users.ToListAsync());
         }
 
         //
@@ -73,7 +73,7 @@ namespace IdentitySample.Controllers
             }
             var user = await UserManager.FindByIdAsync(id);
 
-            ViewBag.RoleNames = user.Claims.Where(x => x.ClaimType == ClaimTypes.Role).Select(x => x.ClaimValue).ToList();
+            ViewBag.RoleNames = await UserManager.GetRolesAsync(user.Id);
 
             return View(user);
         }
@@ -94,27 +94,33 @@ namespace IdentitySample.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser (userViewModel.Email, userViewModel.Email );
-
-
-                //Add User to the selected Roles 
-                foreach (var claim in selectedRoles.Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
-                {
-                    user.Claims.Add(claim);
-                }
-
+                var user = new ApplicationUser { UserName = userViewModel.Email, Email = userViewModel.Email };
                 var adminresult = await UserManager.CreateAsync(user, userViewModel.Password);
 
-                if (!adminresult.Succeeded)
+                //Add User to the selected Roles 
+                if (adminresult.Succeeded)
+                {
+                    if (selectedRoles != null)
+                    {
+                        var result = await UserManager.AddToRolesAsync(user.Id, selectedRoles);
+                        if (!result.Succeeded)
+                        {
+                            ModelState.AddModelError("", result.Errors.First());
+                            ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
+                            return View();
+                        }
+                    }
+                }
+                else
                 {
                     ModelState.AddModelError("", adminresult.Errors.First());
-                    ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
+                    ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
                     return View();
 
                 }
                 return RedirectToAction("Index");
             }
-            ViewBag.RoleId = new SelectList(await RoleManager.Roles.ToListAsync(), "Name", "Name");
+            ViewBag.RoleId = new SelectList(RoleManager.Roles, "Name", "Name");
             return View();
         }
 
@@ -132,14 +138,15 @@ namespace IdentitySample.Controllers
                 return HttpNotFound();
             }
 
-            var ravenRoles = await RoleManager.Roles.ToListAsync();
+            var userRoles = await UserManager.GetRolesAsync(user.Id);
+
             return View(new EditUserViewModel()
             {
                 Id = user.Id,
                 Email = user.Email,
-                RolesList = ravenRoles.Select(x => new SelectListItem()
+                RolesList = RoleManager.Roles.ToList().Select(x => new SelectListItem()
                 {
-                    Selected = user.Claims.Any(c => c.ClaimType == ClaimTypes.Role && c.ClaimValue.Equals(x.Name, StringComparison.OrdinalIgnoreCase)),
+                    Selected = userRoles.Contains(x.Name),
                     Text = x.Name,
                     Value = x.Name
                 })
@@ -163,28 +170,24 @@ namespace IdentitySample.Controllers
                 user.UserName = editUser.Email;
                 user.Email = editUser.Email;
 
-                var userRoles = user.Claims.Where(c => c.ClaimType == ClaimTypes.Role).Select(c => c.ClaimValue).ToList();
+                var userRoles = await UserManager.GetRolesAsync(user.Id);
 
                 selectedRole = selectedRole ?? new string[] { };
 
-                foreach (var claim in selectedRole.Except(userRoles).Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
-                {
-                    user.Claims.Add(claim);
-                }
-
-                foreach (var claim in userRoles.Except(selectedRole).Select(x => new IdentityUserClaim(ClaimTypes.Role, x)))
-                {
-                    user.Claims.Remove(claim);
-                }
-
-                var result = await UserManager.UpdateAsync(user);
+                var result = await UserManager.AddToRolesAsync(user.Id, selectedRole.Except(userRoles).ToArray<string>());
 
                 if (!result.Succeeded)
                 {
                     ModelState.AddModelError("", result.Errors.First());
                     return View();
                 }
+                result = await UserManager.RemoveFromRolesAsync(user.Id, userRoles.Except(selectedRole).ToArray<string>());
 
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", result.Errors.First());
+                    return View();
+                }
                 return RedirectToAction("Index");
             }
             ModelState.AddModelError("", "Something failed.");
@@ -234,16 +237,6 @@ namespace IdentitySample.Controllers
                 return RedirectToAction("Index");
             }
             return View();
-        }
-
-        private ActionResult ListView(IList<ApplicationUser> users)
-        {
-            var summaries = users.MapTo<UsersViewModel.UserSummary>();
-
-            return View("Index", new UsersViewModel
-            {
-                Users = summaries
-            });
         }
     }
 }

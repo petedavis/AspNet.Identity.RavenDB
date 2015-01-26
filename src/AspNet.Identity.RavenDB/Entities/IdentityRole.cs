@@ -4,10 +4,10 @@ using Raven.Imports.Newtonsoft.Json;
 
 namespace AspNet.Identity.RavenDB.Entities
 {
-    public class IdentityUserRole : IRole<string>
+    public class IdentityRole : IRole<string>
     {
         [JsonConstructor]
-        public IdentityUserRole(string name)
+        public IdentityRole(string name)
         {
             if (name == null) throw new ArgumentNullException("name");
 
@@ -23,7 +23,7 @@ namespace AspNet.Identity.RavenDB.Entities
             return string.Format(Constants.IdentityUserRolesKeyTemplate, roleName);
         }
 
-        protected bool Equals(IdentityUserRole other)
+        protected bool Equals(IdentityRole other)
         {
             return string.Equals(Name.ToLowerInvariant(), other.Name.ToLowerInvariant());
         }
@@ -33,7 +33,7 @@ namespace AspNet.Identity.RavenDB.Entities
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((IdentityUserRole) obj);
+            return Equals((IdentityRole) obj);
         }
 
         public override int GetHashCode()
